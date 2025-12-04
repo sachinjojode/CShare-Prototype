@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CShare Test Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .test-results {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .test-group {
+            margin-bottom: 25px;
+        }
+
+        .test-group-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .test-item.pass {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .test-item.fail {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .test-item.running {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .test-icon {
+            font-size: 1.5em;
+            min-width: 30px;
+        }
+
+        .test-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .test-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .test-error {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+            padding-left: 40px;
+            font-family: monospace;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            font-size: 0.9em;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .summary {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-item-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .summary-item-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 CShare Test Suite</h1>
+        <p class="subtitle">Comprehensive testing for the CShare Prototype application</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTests">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="passedTests">0</div>
+                <div class="stat-label">Passed ✅</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="failedTests">0</div>
+                <div class="stat-label">Failed ❌</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+
+        <div class="controls">
+            <button id="runAllBtn" onclick="runAllTests()">▶️ Run All Tests</button>
+            <button id="runUnitBtn" onclick="runUnitTests()">🔧 Run Unit Tests</button>
+            <button id="runIntegrationBtn" onclick="runIntegrationTests()">🔗 Run Integration Tests</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+            <button onclick="exportResults()">📥 Export Results</button>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterTests('all')">All</button>
+            <button class="filter-btn" onclick="filterTests('pass')">Passed</button>
+            <button class="filter-btn" onclick="filterTests('fail')">Failed</button>
+        </div>
+
+        <div class="test-results" id="testResults">
+            <p style="text-align: center; color: #999; padding: 40px;">
+                Click "Run All Tests" to begin testing
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Test utilities and data
+        const testState = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            tests: [],
+            currentFilter: 'all'
+        };
+
+        // Utility functions to test (extracted from app.js)
+        function formatPrice(price) {
+            return price === 0 ? "FREE" : `$${parseFloat(price).toFixed(2)}/day`;
+        }
+
+        function weightDescriptor(value) {
+            const descriptors = {
+                0: "Off",
+                1: "Very Low",
+                2: "Low",
+                3: "Medium",
+                4: "High",
+                5: "Very High"
+            };
+            return descriptors[value] || "Medium";
+        }
+
+        function buildLockIds(itemId, startDate, endDate) {
+            const lockIds = [];
+            const currentDate = new Date(startDate);
+            const end = new Date(endDate);
+
+            while (currentDate <= end) {
+                const dateString = currentDate.toISOString().split('T')[0];
+                lockIds.push(`${itemId}_${dateString}`);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return lockIds;
+        }
+
+        function getChatId(itemId, userId) {
+            return [itemId, userId].sort().join('_');
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSecs = Math.floor(diffMs / 1000);
+            const diffMins = Math.floor(diffSecs / 60);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffSecs < 60) return 'just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+
+        // Test runner
+        async function runTest(name, testFn, group) {
+            const startTime = performance.now();
+            const testId = `test-${Date.now()}-${Math.random()}`;
+
+            try {
+                await testFn();
+                const duration = (performance.now() - startTime).toFixed(2);
+                addTestResult(testId, name, 'pass', null, duration, group);
+                testState.passed++;
+            } catch (error) {
+                const duration = (performance.now() - startTime).toFixed(2);
+                addTestResult(testId, name, 'fail', error.message, duration, group);
+                testState.failed++;
+            }
+
+            testState.total++;
+            updateStats();
+        }
+
+        function addTestResult(id, name, status, error, duration, group) {
+            const test = { id, name, status, error, duration, group };
+            testState.tests.push(test);
+
+            if (!document.querySelector(`[data-group="${group}"]`)) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'test-group';
+                groupDiv.setAttribute('data-group', group);
+                groupDiv.innerHTML = `<div class="test-group-title">${group}</div>`;
+                document.getElementById('testResults').appendChild(groupDiv);
+            }
+
+            const groupDiv = document.querySelector(`[data-group="${group}"]`);
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-item ${status}`;
+            testDiv.setAttribute('data-status', status);
+            testDiv.innerHTML = `
+                <span class="test-icon">${status === 'pass' ? '✅' : '❌'}</span>
+                <span class="test-name">${name}</span>
+                <span class="test-time">${duration}ms</span>
+                ${error ? `<div class="test-error">${error}</div>` : ''}
+            `;
+            groupDiv.appendChild(testDiv);
+        }
+
+        function updateStats() {
+            document.getElementById('totalTests').textContent = testState.total;
+            document.getElementById('passedTests').textContent = testState.passed;
+            document.getElementById('failedTests').textContent = testState.failed;
+
+            const rate = testState.total > 0
+                ? ((testState.passed / testState.total) * 100).toFixed(1)
+                : 0;
+            document.getElementById('successRate').textContent = `${rate}%`;
+
+            const progress = testState.total > 0
+                ? (testState.total / getExpectedTestCount()) * 100
+                : 0;
+            document.getElementById('progressFill').style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        function getExpectedTestCount() {
+            return 45; // Update based on total number of tests
+        }
+
+        window.clearResults = function() {
+            testState.total = 0;
+            testState.passed = 0;
+            testState.failed = 0;
+            testState.tests = [];
+            document.getElementById('testResults').innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Ready to run tests</p>';
+            updateStats();
+        };
+
+        window.filterTests = function(type) {
+            testState.currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.test-item').forEach(item => {
+                if (type === 'all') {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = item.getAttribute('data-status') === type ? 'flex' : 'none';
+                }
+            });
+        };
+
+        window.exportResults = function() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total: testState.total,
+                    passed: testState.passed,
+                    failed: testState.failed,
+                    successRate: testState.total > 0 ? ((testState.passed / testState.total) * 100).toFixed(1) : 0
+                },
+                tests: testState.tests
+            };
+
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cshare-test-report-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // Unit Tests
+        window.runUnitTests = async function() {
+            clearResults();
+            document.getElementById('runUnitBtn').disabled = true;
+
+            // formatPrice tests
+            await runTest('formatPrice - handles zero price', () => {
+                const result = formatPrice(0);
+                if (result !== 'FREE') throw new Error(`Expected "FREE", got "${result}"`);
+            }, 'Utility Functions');
+
+            await runTest('formatPrice - formats regular price', () => {
+                const result = formatPrice(5);
+                if (result !== '$5.00/day') throw new Error(`Expected "$5.00/day", got "${result}"`);
+            }, 'Utility Functions');
+
+            await runTest('formatPrice - formats decimal price', () => {
+                const result = formatPrice(3.5);
+                if (result !== '$3.50/day') throw new Error(`Expected "$3.50/day", got "${result}"`);
+            }, 'Utility Functions');
+
+            // weightDescriptor tests
+            await runTest('weightDescriptor - returns correct descriptors', () => {
+                const tests = [
+                    [0, 'Off'], [1, 'Very Low'], [2, 'Low'],
+                    [3, 'Medium'], [4, 'High'], [5, 'Very High']
+                ];
+                tests.forEach(([value, expected]) => {
+                    const result = weightDescriptor(value);
+                    if (result !== expected) {
+                        throw new Error(`For ${value}, expected "${expected}", got "${result}"`);
+                    }
+                });
+            }, 'Utility Functions');
+
+            // buildLockIds tests
+            await runTest('buildLockIds - single day', () => {
+                const result = buildLockIds('item123', '2024-12-04', '2024-12-04');
+                if (result.length !== 1) throw new Error(`Expected 1 lock, got ${result.length}`);
+                if (result[0] !== 'item123_2024-12-04') throw new Error(`Incorrect lock ID: ${result[0]}`);
+            }, 'Booking System');
+
+            await runTest('buildLockIds - date range', () => {
+                const result = buildLockIds('item456', '2024-12-04', '2024-12-06');
+                if (result.length !== 3) throw new Error(`Expected 3 locks, got ${result.length}`);
+            }, 'Booking System');
+
+            await runTest('buildLockIds - month boundary', () => {
+                const result = buildLockIds('item789', '2024-11-30', '2024-12-02');
+                if (result.length !== 3) throw new Error(`Expected 3 locks, got ${result.length}`);
+                if (!result.includes('item789_2024-11-30')) throw new Error('Missing Nov 30');
+                if (!result.includes('item789_2024-12-01')) throw new Error('Missing Dec 1');
+            }, 'Booking System');
+
+            // getChatId tests
+            await runTest('getChatId - generates consistent ID', () => {
+                const id1 = getChatId('item1', 'user1');
+                const id2 = getChatId('user1', 'item1');
+                if (id1 !== id2) throw new Error(`IDs not consistent: ${id1} vs ${id2}`);
+            }, 'Chat System');
+
+            await runTest('getChatId - different items produce different IDs', () => {
+                const id1 = getChatId('item1', 'user1');
+                const id2 = getChatId('item2', 'user1');
+                if (id1 === id2) throw new Error('Different items should produce different IDs');
+            }, 'Chat System');
+
+            // formatTimeAgo tests
+            await runTest('formatTimeAgo - just now', () => {
+                const result = formatTimeAgo(new Date());
+                if (result !== 'just now') throw new Error(`Expected "just now", got "${result}"`);
+            }, 'Utility Functions');
+
+            await runTest('formatTimeAgo - minutes', () => {
+                const date = new Date(Date.now() - 5 * 60 * 1000);
+                const result = formatTimeAgo(date);
+                if (result !== '5m ago') throw new Error(`Expected "5m ago", got "${result}"`);
+            }, 'Utility Functions');
+
+            await runTest('formatTimeAgo - hours', () => {
+                const date = new Date(Date.now() - 3 * 60 * 60 * 1000);
+                const result = formatTimeAgo(date);
+                if (result !== '3h ago') throw new Error(`Expected "3h ago", got "${result}"`);
+            }, 'Utility Functions');
+
+            document.getElementById('runUnitBtn').disabled = false;
+        };
+
+        // Integration Tests
+        window.runIntegrationTests = async function() {
+            clearResults();
+            document.getElementById('runIntegrationBtn').disabled = true;
+
+            await runTest('Chat ID consistency workflow', () => {
+                const itemId = 'item123';
+                const userId = 'user456';
+                const id1 = getChatId(itemId, userId);
+                const id2 = getChatId(itemId, userId);
+                const id3 = getChatId(userId, itemId);
+
+                if (id1 !== id2 || id1 !== id3) {
+                    throw new Error('Chat IDs should be consistent regardless of call order');
+                }
+            }, 'Integration Tests');
+
+            await runTest('Week-long booking lock generation', () => {
+                const locks = buildLockIds('item999', '2024-12-04', '2024-12-10');
+                if (locks.length !== 7) throw new Error(`Expected 7 locks, got ${locks.length}`);
+
+                const expected = [
+                    'item999_2024-12-04', 'item999_2024-12-05', 'item999_2024-12-06',
+                    'item999_2024-12-07', 'item999_2024-12-08', 'item999_2024-12-09',
+                    'item999_2024-12-10'
+                ];
+
+                expected.forEach((exp, i) => {
+                    if (locks[i] !== exp) {
+                        throw new Error(`Lock ${i} mismatch: expected ${exp}, got ${locks[i]}`);
+                    }
+                });
+            }, 'Integration Tests');
+
+            await runTest('Price formatting consistency', () => {
+                const prices = [0, 1, 5.5, 10, 25.99, 100];
+                const results = prices.map(p => formatPrice(p));
+
+                if (results[0] !== 'FREE') throw new Error('Zero should be FREE');
+                results.slice(1).forEach((r, i) => {
+                    if (!r.startsWith('$') || !r.endsWith('/day')) {
+                        throw new Error(`Invalid format: ${r}`);
+                    }
+                });
+            }, 'Integration Tests');
+
+            document.getElementById('runIntegrationBtn').disabled = false;
+        };
+
+        // Run all tests
+        window.runAllTests = async function() {
+            clearResults();
+            document.getElementById('runAllBtn').disabled = true;
+
+            await runUnitTests();
+            await runIntegrationTests();
+
+            // Performance tests
+            await runTest('formatPrice performance (1000 calls)', () => {
+                const start = performance.now();
+                for (let i = 0; i < 1000; i++) {
+                    formatPrice(Math.random() * 100);
+                }
+                const duration = performance.now() - start;
+                if (duration > 100) {
+                    throw new Error(`Too slow: ${duration.toFixed(2)}ms`);
+                }
+            }, 'Performance Tests');
+
+            await runTest('buildLockIds performance (100 week-long bookings)', () => {
+                const start = performance.now();
+                for (let i = 0; i < 100; i++) {
+                    buildLockIds(`item${i}`, '2024-12-04', '2024-12-10');
+                }
+                const duration = performance.now() - start;
+                if (duration > 200) {
+                    throw new Error(`Too slow: ${duration.toFixed(2)}ms`);
+                }
+            }, 'Performance Tests');
+
+            document.getElementById('runAllBtn').disabled = false;
+
+            // Show summary
+            setTimeout(() => {
+                alert(`✅ Test run complete!\n\nTotal: ${testState.total}\nPassed: ${testState.passed}\nFailed: ${testState.failed}\n\nSuccess Rate: ${((testState.passed / testState.total) * 100).toFixed(1)}%`);
+            }, 500);
+        };
+
+        // Auto-run on load (optional)
+        // window.addEventListener('load', () => setTimeout(runAllTests, 1000));
+    </script>
+</body>
+</html>
