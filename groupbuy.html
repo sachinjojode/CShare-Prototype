@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Buy - CShare</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .tab-btn:hover { color: #333; }
+        .tab-btn.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Item Card Styles */
+        .item-card { 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+            position: relative;
+        }
+        .item-card:hover { transform: translateY(-2px); border-color: #007bff; }
+
+        .notification-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ff3b30;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        /* Detail & Comment Styles */
+        .comment-box {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: left;
+            position: relative;
+        }
+        
+        /* NEW: Indentation for replies */
+        .reply-indent {
+            margin-left: 40px;
+            border-left: 3px solid #eee;
+            background-color: #fafafa;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .owner-tag { background: #fff3cd; color: #856404; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8em; margin-left: 5px; }
+        .private-tag { background: #e2e3e5; color: #383d41; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 5px; }
+
+        .btn-reply-text {
+            background: none;
+            border: none;
+            color: #007bff;
+            font-size: 0.8em;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 5px;
+        }
+        .btn-reply-text:hover { text-decoration: underline; }
+
+        .detail-section {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .info-row { display: flex; align-items: center; margin-top: 10px; color: #333; font-weight: 500; }
+        .info-icon { margin-right: 10px; font-size: 1.2em; width: 20px; text-align: center; }
+        
+        /* Reply Indicator Box */
+        #reply-indicator {
+            display: none; /* Hidden by default */
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">CShare</a>
+                <div class="user-controls">
+                    <a href="index.html" class="btn-secondary">← Back to Main App</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container main-container">
+        <div class="hero">
+            <h2>Group Buy Hub</h2>
+            <p>Save money by splitting bulk items with neighbors.</p>
+        </div>
+
+        <div class="tab-container" id="mainTabs">
+            <button class="tab-btn active" id="tab-btn-create">📝 Start</button>
+            <button class="tab-btn" id="tab-btn-find">🔍 Find All</button>
+            <button class="tab-btn" id="tab-btn-joined">🙋‍♂️ My Joined</button>
+        </div>
+
+        <div id="content-create" class="tab-content active">
+            <div class="form-container" style="max-width: 600px; margin: 0 auto;">
+                <h3>Create New Listing</h3>
+                <form id="groupBuyForm">
+                    <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-weight: bold; color: #0d47a1;">
+                            <input type="checkbox" id="gbIsWholesale" style="width: 20px; height: 20px; margin-right: 10px;">
+                            I have a Wholesale Membership
+                        </label>
+                        <div id="gbProviderContainer" style="display: none; margin-top: 10px;">
+                            <label style="font-size: 0.9em;">Membership Provider</label>
+                            <input type="text" id="gbProviderName" placeholder="e.g. Costco, Sam's Club">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Item / Event Name</label>
+                        <input type="text" id="gbItemName" placeholder="e.g. Weekly Costco Run" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="gbDescription" rows="4" placeholder="Describe what we are buying and how we split it..." required></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Meetup Location</label>
+                            <input type="text" id="gbLocation" placeholder="e.g. Building Lobby" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Date & Time</label>
+                            <input type="datetime-local" id="gbDateTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Max People Needed</label>
+                        <input type="number" id="gbMaxPeople" min="2" value="5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cost Structure</label>
+                        <input type="text" id="gbCostDisplay" value="Shared Cost (No Extra Fee)" disabled 
+                            style="background: #f8f9fa; font-weight: bold; color: #333;">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%;">Publish Group Buy</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="content-find" class="tab-content">
+            <div class="items-grid" id="groupBuyListContainer">
+                <p style="color: #666; text-align: center; grid-column: 1/-1;">Loading available deals...</p>
+            </div>
+        </div>
+
+        <div id="content-joined" class="tab-content">
+            <div class="items-grid" id="groupBuyJoinedContainer">
+                <p style="color: #666; text-align: center; grid-column: 1/-1;">Loading your groups...</p>
+            </div>
+        </div>
+
+        <div id="content-detail" class="tab-content">
+            <button class="btn-secondary" id="btn-back-to-list" style="margin-bottom: 20px;">← Back to List</button>
+            
+            <div class="form-container" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                <div id="detail-header" style="margin-bottom: 20px;"></div>
+                
+                <h2 id="detail-title" style="margin-bottom: 10px;"></h2>
+                <p id="detail-owner" style="color: #888; font-size: 0.9em; margin-bottom: 20px;"></p>
+
+                <div class="detail-section">
+                    <h4 style="margin-top: 0; color: #555; border-bottom: 1px solid #eee; padding-bottom: 10px;">About this Group Buy</h4>
+                    <p id="detail-description" style="white-space: pre-wrap; color: #444; line-height: 1.5;"></p>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                        <div class="info-row">
+                            <span class="info-icon">📍</span> <span id="detail-location"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">🕒</span> <span id="detail-datetime"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-around; background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                    <div>
+                        <div style="font-size: 0.8em; color: #666; text-transform: uppercase; letter-spacing: 1px;">Cost Type</div>
+                        <div id="detail-cost" style="font-size: 1.2em; font-weight: bold; margin-top: 5px;"></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8em; color: #666; text-transform: uppercase; letter-spacing: 1px;">Participants</div>
+                        <div id="detail-count" style="font-size: 1.2em; font-weight: bold; margin-top: 5px;"></div>
+                    </div>
+                </div>
+
+                <div id="detail-action-container" style="margin-bottom: 40px;"></div>
+
+                <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: left;">
+                    <h3>💬 Discussion</h3>
+                    <div style="background: #f8faf9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        
+                        <div id="reply-indicator">
+                            <span id="reply-target-text">Replying to...</span>
+                            <button id="btn-cancel-reply" style="background:none; border:none; cursor:pointer; font-weight:bold; color:#d32f2f;">✕ Cancel</button>
+                        </div>
+
+                        <textarea id="commentInput" placeholder="Ask a question..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; min-height: 60px;"></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <label id="privateCommentLabel" style="font-size: 0.9em; color: #666; cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="commentIsPrivate" style="margin-right: 5px;">
+                                🔒 Visible to Poster Only
+                            </label>
+                            <button class="btn-primary" id="btn-post-comment" style="padding: 8px 15px; font-size: 0.9em;">Post Comment</button>
+                        </div>
+                    </div>
+                    <div id="comments-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="env.js"></script>
+    <script type="module" src="src/groupbuy.js"></script>
+</body>
+</html>
