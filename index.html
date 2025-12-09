@@ -10,7 +10,6 @@
 </head>
 
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
@@ -23,9 +22,7 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="container main-container">
-        <!-- Home View -->
         <div id="homeView" class="view active">
             <div class="hero">
                 <h2>Share. Rent. Save.</h2>
@@ -33,6 +30,10 @@
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Search for items...">
                     <button class="btn-primary" id="searchBtn">🔍</button>
+                    
+                    <a href="groupbuy.html" class="btn-secondary" style="margin-left: 10px; text-decoration: none; display: flex; align-items: center;">🤝 Group Buy
+                    </a>
+
                 </div>
             </div>
 
@@ -51,19 +52,15 @@
             </div>
 
             <div class="items-grid" id="itemsGrid">
-                <!-- Items will be dynamically inserted here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Item Detail View -->
         <div id="itemDetailView" class="view">
             <button class="btn-back" id="backFromDetailBtn">← Back to Listings</button>
             <div class="item-detail" id="itemDetailContent">
-                <!-- Item details will be dynamically inserted here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Create Listing View -->
         <div id="createListingView" class="view">
             <button class="btn-back" id="backFromCreateBtn">← Back</button>
             <div class="form-container">
@@ -138,7 +135,6 @@
             </div>
         </div>
 
-        <!-- Edit Item View -->
         <div id="editItemView" class="view">
             <button class="btn-back" id="backFromEditBtn">← Back</button>
             <div class="form-container">
@@ -214,18 +210,15 @@
             </div>
         </div>
 
-        <!-- My Items View -->
         <div id="myItemsView" class="view">
             <button class="btn-back" id="backFromMyItemsBtn">← Back</button>
             <div class="my-items-container">
                 <h2>My Listings</h2>
                 <div class="items-grid" id="myItemsGrid">
-                    <!-- User's items will be dynamically inserted here -->
-                </div>
+                    </div>
             </div>
         </div>
 
-        <!-- My Bookings View -->
         <div id="myBookingsView" class="view">
             <button class="btn-back" id="backFromMyBookingsBtn">← Back</button>
             <div class="booking-requests-container">
@@ -249,27 +242,22 @@
             </div>
         </div>
 
-        <!-- My Chats View -->
         <div id="myChatsView" class="view">
             <button class="btn-back" id="backFromMyChatsBtn">← Back</button>
             <div class="my-chats-container">
                 <h2>💬 My Chats</h2>
                 <div id="chatsList" class="chats-list">
-                    <!-- Chat list will be dynamically inserted here -->
-                </div>
+                    </div>
             </div>
         </div>
 
-        <!-- Chat View -->
         <div id="chatView" class="view">
             <button class="btn-back" id="backFromChatBtn">← Back</button>
             <div class="chat-container">
                 <div class="chat-header" id="chatHeader">
-                    <!-- Chat header will be dynamically inserted -->
-                </div>
+                    </div>
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Messages will be dynamically inserted here -->
-                </div>
+                    </div>
                 <div id="typingIndicatorContainer" style="display: none;"></div>
                 <div class="chat-input-container">
                     <input type="text" id="chatInput" placeholder="Type a message...">
@@ -278,7 +266,6 @@
             </div>
         </div>
 
-        <!-- Booking Requests View -->
         <div id="bookingRequestsView" class="view">
             <button class="btn-back" id="backFromBookingRequestsBtn">← Back</button>
             <div class="booking-requests-container">
@@ -296,14 +283,12 @@
             </div>
         </div>
 
-        <!-- Testing Dashboard View -->
         <div id="testingDashboardView" class="view">
             <button class="btn-back" id="backFromTestingDashboardBtn">← Back</button>
             <div class="dashboard-container">
                 <h2>📊 Advanced Testing Dashboard</h2>
                 <p class="dashboard-subtitle">Real-time analytics with user funnels, charts, and session replay</p>
 
-                <!-- Time Period Toggle -->
                 <div class="dashboard-section">
                     <div class="period-toggle">
                         <button class="period-btn active" data-period="daily">Daily</button>
@@ -312,7 +297,6 @@
                     </div>
                 </div>
 
-                <!-- Admin Controls - Clear Data -->
                 <div class="dashboard-section admin-section">
                     <h3>🗑️ Admin: Clear Testing Data</h3>
                     <p class="dashboard-subtitle">Clear analytics and session data from the database</p>
@@ -324,7 +308,6 @@
                     <div id="clearDataStatus" class="clear-status"></div>
                 </div>
 
-                <!-- Automated Testing -->
                 <div class="dashboard-section">
                     <h3>🧪 Automated User Testing</h3>
                     <p class="dashboard-subtitle">Simulate complete user journeys and log analytics</p>
@@ -335,7 +318,6 @@
                     <div class="auto-test-log" id="autoTestLog"></div>
                 </div>
 
-                <!-- Conversion Funnel -->
                 <div class="dashboard-section">
                     <h3>🔄 User Conversion Funnel</h3>
                     <p class="dashboard-subtitle">Track user journey from view to booking acceptance</p>
@@ -343,19 +325,16 @@
                     <div id="funnelStats" class="funnel-stats"></div>
                 </div>
 
-                <!-- Drop-off Analysis -->
                 <div class="dashboard-section">
                     <h3>⚠️ Top Failing Steps (Drop-off Analysis)</h3>
                     <div id="dropoffAnalysis" class="dropoff-container"></div>
                 </div>
 
-                <!-- Metrics Over Time Chart -->
                 <div class="dashboard-section">
                     <h3>📈 Activity Over Time</h3>
                     <canvas id="timelineChart" width="800" height="300"></canvas>
                 </div>
 
-                <!-- Quick Stats -->
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <h3>Total Views</h3>
@@ -380,7 +359,6 @@
                     </div>
                 </div>
 
-                <!-- Session Replay -->
                 <div class="dashboard-section">
                     <h3>🎬 Session Replay</h3>
                     <p class="dashboard-subtitle">Replay user sessions chronologically</p>
@@ -394,7 +372,6 @@
                     <div id="replayLog" class="replay-log"></div>
                 </div>
 
-                <!-- Detailed Session Playback Tool -->
                 <div class="dashboard-section">
                     <h3>🎥 Detailed Session Playback</h3>
                     <p class="dashboard-subtitle">Replay user sessions with timeline scrubbing and event navigation</p>
@@ -466,7 +443,6 @@
                     </div>
                 </div>
 
-                <!-- Top Items & Categories -->
                 <div class="dashboard-grid">
                     <div class="dashboard-section">
                         <h3>🏆 Top 5 Most Viewed Items</h3>
@@ -481,7 +457,6 @@
         </div>
     </div>
 
-    <!-- Booking Modal -->
     <div id="bookingModal" class="modal">
         <div class="modal-content">
             <h3>Request to Book</h3>
@@ -502,7 +477,6 @@
         </div>
     </div>
 
-    <!-- Preferences Modal -->
     <div id="preferencesModal" class="modal">
         <div class="modal-content">
             <h3>User Preferences</h3>
@@ -573,7 +547,6 @@
         </div>
     </div>
 
-    <!-- Test Listings Modal -->
     <div id="testListingsModal" class="modal">
         <div class="modal-content">
             <h3>Test Data Management</h3>
@@ -586,7 +559,6 @@
         </div>
     </div>
 
-    <!-- Load environment configuration before app.js -->
     <script src="env.js"></script>
     <script src="seed-data.js"></script>
     <script type="module" src="src/app.js"></script>
