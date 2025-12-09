@@ -21,7 +21,7 @@ import { formatPrice } from '../utils/formatters.js';
 const db = firebaseService.getDb();
 
 /**
- * Render items to the grid
+ * Render items to the grid with 2-column dashboard layout
  * @param {Array} itemsToRender - Array of items to display
  */
 export function renderItems(itemsToRender) {
@@ -58,29 +58,63 @@ export function renderItems(itemsToRender) {
         grouped[cat].push(item);
     });
 
-    // Build category jump nav
-    const nav = categoryOrder.length > 1
+    // Build sidebar navigation pills
+    const sidebar = categoryOrder.length > 1
         ? `
-            <div class="category-nav">
-                ${categoryOrder.map(cat => {
-                    const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                    return `<a class="category-pill" href="#cat-${slug}">${cat} (${grouped[cat].length})</a>`;
-                }).join('')}
+            <div class="items-sidebar">
+                <div class="category-nav">
+                    <h4>Categories</h4>
+                    <a class="category-pill active" href="#" data-category="all">
+                        <span>All Items</span>
+                        <span class="category-pill-count">${itemsToRender.length}</span>
+                    </a>
+                    ${categoryOrder.map((cat) => {
+                        const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        return `<a class="category-pill" href="#cat-${slug}" data-category="${slug}">
+                            <span>${cat}</span>
+                            <span class="category-pill-count">${grouped[cat].length}</span>
+                        </a>`;
+                    }).join('')}
+                </div>
             </div>
         `
         : '';
 
-    const sections = categoryOrder.map(cat => {
+    // Build ungrouped view (all items by preference order)
+    const ungroupedCards = itemsToRender.map(item => {
+        const descriptionPreview = (item.description || '').substring(0, 100);
+        const matchSection = renderMatchBreakdown(item);
+        return `
+            <div class="item-card" onclick="showItemDetail('${item.id}')">
+                <div class="item-emoji">${item.emoji || '📦'}</div>
+                <h3>${item.name}</h3>
+                <span class="item-category">${item.category}</span>
+                <p>${descriptionPreview}${descriptionPreview.length >= 100 ? '...' : ''}</p>
+                <div class="item-price">${formatPrice(item.price)}</div>
+                ${matchSection}
+                <div class="item-owner">Listed by ${item.ownerName}</div>
+            </div>
+        `;
+    }).join('');
+
+    const ungroupedSection = `
+        <div id="all-items-view" class="category-grid" style="display: grid;">
+            ${ungroupedCards}
+        </div>
+    `;
+
+    // Build grouped sections (by category)
+    const groupedSections = categoryOrder.map(cat => {
         const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         const cards = grouped[cat].map(item => {
-            const descriptionPreview = (item.description || '').substring(0, 80);
+            const descriptionPreview = (item.description || '').substring(0, 100);
             const matchSection = renderMatchBreakdown(item);
             return `
                 <div class="item-card" onclick="showItemDetail('${item.id}')">
                     <div class="item-emoji">${item.emoji || '📦'}</div>
                     <h3>${item.name}</h3>
                     <span class="item-category">${item.category}</span>
-                    <p>${descriptionPreview}...</p>
+                    <p>${descriptionPreview}${descriptionPreview.length >= 100 ? '...' : ''}</p>
                     <div class="item-price">${formatPrice(item.price)}</div>
                     ${matchSection}
                     <div class="item-owner">Listed by ${item.ownerName}</div>
@@ -89,22 +123,99 @@ export function renderItems(itemsToRender) {
         }).join('');
 
         return `
-            <section id="cat-${slug}" class="category-section">
+            <section id="cat-${slug}" class="category-section" style="display: none;">
                 <div class="category-header">
                     <h3>${cat}</h3>
                     <span class="category-count">${grouped[cat].length} item${grouped[cat].length === 1 ? '' : 's'}</span>
                 </div>
-                <div class="items-grid category-grid">
+                <div class="category-grid">
                     ${cards}
                 </div>
             </section>
         `;
     }).join('');
 
-    grid.innerHTML = `
-        ${nav}
-        ${sections}
-    `;
+    // Render 2-column layout
+    grid.innerHTML = categoryOrder.length > 1
+        ? `
+            <div class="items-container-wrapper">
+                ${sidebar}
+                <div class="items-content">
+                    ${ungroupedSection}
+                    ${groupedSections}
+                </div>
+            </div>
+        `
+        : `
+            <div class="items-content">
+                ${ungroupedSection}
+            </div>
+        `;
+
+    // Add event listeners for category navigation
+    if (categoryOrder.length > 1) {
+        attachCategoryNavListeners();
+    }
+}
+
+/**
+ * Attach event listeners for category navigation pills
+ */
+function attachCategoryNavListeners() {
+    const pills = document.querySelectorAll('.category-pill');
+    const allSections = document.querySelectorAll('.category-section');
+    const ungroupedView = document.getElementById('all-items-view');
+
+    pills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Update active state
+            pills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+
+            const categoryId = pill.getAttribute('data-category');
+
+            // Handle "All Items" filter - show ungrouped view
+            if (categoryId === 'all') {
+                // Show ungrouped view (items by preference order)
+                if (ungroupedView) {
+                    ungroupedView.style.display = 'grid';
+                }
+                // Hide all category sections
+                allSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                // Scroll to top of content
+                const itemsContent = document.querySelector('.items-content');
+                if (itemsContent) {
+                    itemsContent.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            } else {
+                // Hide ungrouped view
+                if (ungroupedView) {
+                    ungroupedView.style.display = 'none';
+                }
+                // Hide all category sections first
+                allSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // Show only the selected category
+                const targetSection = document.getElementById(`cat-${categoryId}`);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
 }
 
 /**

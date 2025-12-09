@@ -8,6 +8,7 @@ import { store } from '../../stores/stateStore.js';
 import { ITEM_EMOJIS } from '../../utils/constants.js';
 import { formatPrice } from '../../utils/formatters.js';
 import { rankItems } from '../ranking/rankingAlgorithm.js';
+import { renderItems } from '../../ui/itemRenderer.js';
 
 /**
  * Load items from Firestore and render them
@@ -36,34 +37,6 @@ export async function loadItems() {
             </div>
         `;
     }
-}
-
-/**
- * Render items to the grid
- * @param {Array} itemsToRender - Array of items to display
- */
-function renderItems(itemsToRender) {
-    const grid = document.getElementById('itemsGrid');
-
-    if (itemsToRender.length === 0) {
-        grid.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-emoji">📦</div>
-                <p>No items found. Try adjusting your filters or search.</p>
-            </div>
-        `;
-        return;
-    }
-
-    grid.innerHTML = itemsToRender.map(item => `
-        <div class="item-card" onclick="showItemDetail('${item.id}')">
-            <div class="item-emoji">${item.emoji || '📦'}</div>
-            <h3>${item.name}</h3>
-            <span class="item-category">${item.category}</span>
-            <p>${item.description.substring(0, 80)}...</p>
-            <div class="item-price">${formatPrice(item.price)}</div>
-        </div>
-    `).join('');
 }
 
 /**

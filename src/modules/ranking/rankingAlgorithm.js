@@ -209,18 +209,40 @@ export function getMatchMetrics(item) {
 }
 
 /**
+ * Get color for match score
+ * @param {number} score - Match score (0-100)
+ * @returns {string} Color hex code
+ */
+function getScoreColor(score) {
+    if (score >= 70) return '#22c55e'; // Green
+    if (score >= 40) return '#f59e0b'; // Yellow
+    return '#9ca3af'; // Grey
+}
+
+/**
  * Render match breakdown HTML for an item
  * @param {Object} item - Item with ranking data
  * @returns {string} HTML string
  */
 export function renderMatchBreakdown(item) {
     const { matchScore, breakdown } = getMatchMetrics(item);
+    const color = getScoreColor(matchScore);
+    const circumference = 2 * Math.PI * 28; // radius = 28
+    const progress = ((100 - matchScore) / 100) * circumference;
 
     return `
         <div class="match-section">
             <div class="match-score">
-                <div class="match-score-number">${matchScore}</div>
-                <div class="match-score-label">Match score (0–100)</div>
+                <div class="match-score-circle">
+                    <svg width="70" height="70" viewBox="0 0 70 70">
+                        <circle cx="35" cy="35" r="28" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+                        <circle cx="35" cy="35" r="28" fill="none" stroke="${color}" stroke-width="6"
+                                stroke-dasharray="${circumference}" stroke-dashoffset="${progress}"
+                                stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-score-number">${matchScore}</div>
+                </div>
+                <div class="match-score-label">Match Score</div>
             </div>
             <details class="match-breakdown" onclick="event.stopPropagation()">
                 <summary>Why this item matches?</summary>
